@@ -175,70 +175,118 @@ In this project:
 
 ---
 
-### Migrating Data 
+### Migrating Data
 
-Required keys 
-    Snowflake
-        Account Number
-        Username
-        Password
-    Event Hub
-        Event Hub Name - Not the namespace but the Event Hub Name
-        Connection String
+---
 
-Create Variables for each of the above mentioned keys in Azure Function App
-    Go into *Configuration >> Blue ribbon >>* that should take you into *Environment Variables*
-    Create a variable for each of the above mentioned keys
+#### 🔑 Required Keys
 
-[insert-image-here]
+**Snowflake**
+- `Account Number`
+- `Username`
+- `Password`
 
-Run the script that sends out a HTTP Request
-    Open up a new directory in your preferred IDE (I use VSCode)
-    Download the following extensions
-        Azure Functions
-        Azure Resources 
-    Create a .env file which contains the above mentioned keys. The script will be fetching the values from this file. File format
-        Snowflake_User = "USERKEY"
-        Snowflake_Password = "PASSWORD"
-        .
-        .
-        .
-    *Make sure to keep the variables names consistent with the names you are using in the python script*
-    Run the python script provided *I have named it eventhub.py*
+**Event Hub**
+- `Event Hub Name` (Note: **not** the namespace)
+- `Connection String`
 
-Once the script runs without any errors, check the Event Hub overview for the graphs. It should show the incoming messages spike. If you don't see any updates in the graph give it a few minutes and refresh it.
+---
 
-Transfer data from Event Hub to Blob Storage container
-    Once you have confirmed the messages being received into Event Hubs, you can query the data into Blob with the help of Stream Analytics
-    Head over to your Stream Analytics Service and within that *Job Topology >> Query*
-    Create an input - your Event Hub and an output - the desired Blob Storage Container
-    Now use the following query
-        SELECT *
-        INTO
-            *output-blob*
-        FROM
-            *input-event-hub*
-    Check the Stream Analytics metrics after a few minutes and you should be seeing the messages being transferred
-    After 5 minutes or so, check your Blob Storage Container and you should see the JSON file inside
+#### 🛠️ Configure Environment Variables in Function App
 
-Data Pipeline 
-    This is responsible for our bronze to silver layer transformations
-    Head into the Data Factory and click on the *Author* Tab - the pencil icon
-    Create a new Dataset that links to the raw-data we have in the Blob. 
-    Create a new Dataflow with the *Source* being the Dataset that we just created in the previous step. 
-        Disable sampling
-        Allow Schema Drift
-        Within *Projection* we are going to change the data types of certain columns
-            Integer for Transaction_ID, Age, Price_per_Unit, Total_Amount, Quantity
-            Date for Date
-        Within *Data preview*, enable *Data Flow Debug* - Present on the top left of the Dataflow window and check if there are any errors present in the data.
-            Sometimes, the data might not load, in such cases, hit refresh and switch to *Projections* tab and head back into the *Data Preview* and you will see the data.
-    Create a *Derived Column* - This is used to create new custom columns. We will be creating 2 new columns
-        1. CustDC - toInteger(substring(CUSTOMER_ID, 5, length(CUSTOMER_ID) - 4))
-        2. GenderDC - lower(trim(GENDER))
-    Create a *Select Column* - This is used for removing unwanted columns in the dataset. We will be removing the following columns (All these columns contain the metadata from the Event Hub ingestion time)
-        1. EventProcessedUtcTime
-        2. PartitionId
-        3. EventEnqueuedUtcTime
-    Create a *Sink*. This is where the processed data will be dumped into. 
-        We will create a new *Dataset* that will point to the location of the target. 
+1. Go to your **Azure Function App**
+2. Navigate to:  
+   `Configuration → Application settings (Blue ribbon)`
+3. Add a **new application setting** for each key mentioned above (Snowflake and Event Hub)
+
+> Each key should be added as an environment variable.
+
+📌 *Keep the variable names consistent with what is used in your Python script.*
+
+---
+
+#### 🧪 Run the Script to Trigger HTTP Request
+
+1. Open a new directory in your preferred IDE (e.g., VS Code)
+2. Install the following **extensions**:
+   - Azure Functions
+   - Azure Resources
+
+3. Create a `.env` file to store your credentials and keys:
+    ```env
+    Snowflake_User="USERKEY"
+    Snowflake_Password="PASSWORD"
+    Snowflake_Account="ACCOUNTNUMBER"
+    EventHub_Name="EVENTHUBNAME"
+    EventHub_Connection="CONNECTIONSTRING"
+    ```
+
+4. Run the provided Python script (e.g., `eventhub.py`) to:
+   - Connect to Snowflake
+   - Fetch data
+   - Send it to Event Hub
+
+✅ Once the script runs successfully, check your **Event Hub → Overview tab**  
+📊 You should see a spike in **incoming messages**. If not, wait a few minutes and refresh the graph.
+
+---
+
+#### 📥 Transfer Data from Event Hub to Blob Storage
+
+1. Go to your **Stream Analytics Job**
+2. Navigate to: `Job Topology → Query`
+3. Configure your **input** as:
+   - **Event Hub**
+
+4. Configure your **output** as:
+   - **Blob Storage Container**
+
+5. Use the following query:
+    ```sql
+    SELECT *
+    INTO [output-blob]
+    FROM [input-event-hub]
+    ```
+
+6. Save and start the job.
+
+📈 After a few minutes, check the **Stream Analytics metrics**.  
+📁 Then check your **Blob Storage container** — the JSON file should be present.
+
+---
+
+#### 🧱 Data Pipeline: Bronze → Silver
+
+This section handles **transforming raw data (Bronze) into cleaned data (Silver)** using Azure Data Factory.
+
+1. Open **Azure Data Factory**
+2. Go to the **Author tab** (🖉 Pencil icon)
+3. Create a new **Dataset** pointing to the raw data in Blob Storage
+4. Create a new **Data Flow**:
+    - **Source**: The dataset you just created
+    - Disable **sampling**
+    - Enable **schema drift**
+
+5. Under **Projection**, change the data types:
+    - `Transaction_ID`, `Age`, `Price_per_Unit`, `Total_Amount`, `Quantity` → `Integer`
+    - `Date` → `Date`
+
+6. In **Data Preview**:
+    - Enable **Data Flow Debug**
+    - If data doesn't load, switch to **Projections**, then back to **Data Preview**
+
+7. Add a **Derived Column** transformation:
+    - `CustDC` → `toInteger(substring(CUSTOMER_ID, 5, length(CUSTOMER_ID) - 4))`
+    - `GenderDC` → `lower(trim(GENDER))`
+
+8. Add a **Select Column** transformation:
+    - Remove these Event Hub metadata columns:
+      - `EventProcessedUtcTime`
+      - `PartitionId`
+      - `EventEnqueuedUtcTime`
+
+9. Add a **Sink**:
+    - This is the output destination for your transformed data
+    - Create a new **Dataset** pointing to the **target location**
+
+---
