@@ -1,17 +1,15 @@
 # **END-TO-END DATA ENGINEERING PROJECT**
 ## **Basic Project Description**
 
-This end-to-end project aims at covering a variety of tools and services within Azure Cloud platform, Databricks and Snowflake.
-It includes a complete Data Engineering module with the end goal as drawing insights with the data.
+This end-to-end project aims at covering a variety of tools and services within Azure Cloud platform, Databricks and Snowflake.  It includes a complete Data Engineering module with the end goal as drawing insights with the data.
 
 ## **About the Dataset**
 
-The dataset used is the retails_sales_dataset.csv. The link to the dataset can be found [here](https://www.kaggle.com/datasets/mohammadtalib786/retail-sales-dataset)
-The dataset contains of 1000 entries with the following columns
-    Transaction ID - Unique ID representing the transaction _Can be considered as the Primary Key_
-    Date - Date of the transaction _Format: YYYY-MM-DD_
-    Customer ID - Every customer has a unique ID _Format: CUST001_
-    Gender - Male or Female
+The dataset used is the retails_sales_dataset.csv. The link to the dataset can be found [here](https://www.kaggle.com/datasets/mohammadtalib786/retail-sales-dataset)  The dataset contains of 1000 entries with the following columns
+    1. Transaction ID - Unique ID representing the transaction _Can be considered as the Primary Key_
+    2. Date - Date of the transaction _Format: YYYY-MM-DD_
+    3. Customer ID - Every customer has a unique ID _Format: CUST001_
+    4. Gender - Male or Female
     Age - Age of the Customer
     Product Category - Different product categories
     Quantity - Amount of that particular product bought in that order
