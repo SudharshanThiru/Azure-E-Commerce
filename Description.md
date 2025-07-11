@@ -33,24 +33,60 @@ The dataset contains 1000 entries with the following columns:
 ## Data Engineering
 
 ### Snowflake
-The first step in the project was to upload the dataset into Snowflake. Snowflake is a data warehousing platform used to store large amounts of data, analyze and share it securely. 
-Though our data was not a large scale dataset, this step is included to mimic an actual data engineering pipeline.
-There are 2 methods to push the data into Snowflake
-    1. Use the Snowflake CLI and SnowSQL to create a Database and push the data from local storage into the created DB
-        The following dependencies have to be installed in order to perform that.
-            Snowflake CLI   - [Link](https://docs.snowflake.com/en/developer-guide/snowflake-cli/installation/installation)
-            SnowSQL         - [Link](https://docs.snowflake.com/en/user-guide/snowsql-install-config)
-        In the CLI use the following command _snowsql -a ACCOUNTNUMBER -u USERNAME_ The ACCOUNTNUMBER and USERNAME can be found in the bottom-left of the webpage _Account >> View Account Details_
-        In the webpage, head over to _Data_ and within that, create a new Database.
-        Back in the CLI, use the command *PUT FILE ://FILEPATH @DATABASENAME AUTO_COMPRESS=TRUE*
-        *THIS STEP DIDN'T WORK SO I MOVED TO METHOD 2*
 
-    2. Manually uploading the file through the web-interface
-        In the webpage, head over to _Data_ and within that, create a new Database.
-        Within the new Database, create a new schema and within the schema create a new table.
-        Load the data into the table and choose the right file format
-        The column names shouldn't contain spaces, so correct them in the same interface by either adding '_' or removing the space
-Test the data upload by going to *Projects >> Worksheets* and performing a simple SQL command
+The first step in the project was to upload the dataset into **Snowflake**.  
+Snowflake is a data warehousing platform used to store large amounts of data, analyze, and share it securely.  
+
+Though our dataset isn't large-scale, this step is included to mimic a real-world data engineering pipeline.
+
+There are **2 methods** to push the data into Snowflake:
+
+---
+
+#### 1. Using the Snowflake CLI and SnowSQL
+
+This method involves using the command line to create a database and upload the data from local storage.
+
+**Dependencies** (install these first):
+- [Snowflake CLI](https://docs.snowflake.com/en/developer-guide/snowflake-cli/installation/installation)
+- [SnowSQL](https://docs.snowflake.com/en/user-guide/snowsql-install-config)
+
+**Steps:**
+- Open your CLI and run the command:  
+  ```bash
+  snowsql -a ACCOUNTNUMBER -u USERNAME
+  ```
+  - `ACCOUNTNUMBER` and `USERNAME` can be found in the bottom-left of the Snowflake webpage:  
+    _Account → View Account Details_
+
+- On the Snowflake web interface:
+  - Go to the **Data** tab and create a **new Database**.
+
+- Back in the CLI, run the command:
+  ```bash
+  PUT file://<FILEPATH> @<DATABASENAME> AUTO_COMPRESS=TRUE
+  ```
+
+> ⚠️ **Note**: This step didn’t work due to CLI/filepath issues, so I moved on to **Method 2**.
+
+---
+
+#### 2. Manually Uploading the File via Web Interface
+
+**Steps:**
+- On the Snowflake web interface:
+  - Go to the **Data** tab and create a **new Database**.
+  - Inside the database, create a **new Schema**, then create a **new Table**.
+  - Upload the CSV file and choose the appropriate **file format**.
+  - Ensure column names don't contain spaces. You can rename them in the upload interface using `_` or by removing spaces.
+
+**To verify the upload:**
+- Go to **Projects → Worksheets**
+- Run a basic SQL query such as:
+  ```sql
+  SELECT * FROM your_table_name LIMIT 10;
+  ```
+
 
 ### Azure Services Used 
 #### FunctionApp
