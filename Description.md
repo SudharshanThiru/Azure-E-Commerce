@@ -87,44 +87,93 @@ This method involves using the command line to create a database and upload the 
   SELECT * FROM your_table_name LIMIT 10;
   ```
 
+ 
+### Azure Services Used
 
-### Azure Services Used 
-#### FunctionApp
-Function Apps is a serverless compute service on Azure that allows you to run code without managing servers. It's event-driven, meaning functions are triggered by specific events like HTTP requests, timer events, or messages in a queue. 
-We will be using the Function App to trigger a HTTP Request that will fetch the data from our Database in Snowflake and upload it into a storage container *This is the final destination for the data but there will be certain intermediate steps that will be covered*
-We use the *Consumption* Plan to create the function app. The settings are as follows:
-    OS - Windows 
-    Runtime Stack - Powershell Core
-    Version - 7.3 *Keep the latest version available*
-    Storage - *Choose the default given storage*
-Keep other specs as it is and create the functionapp
+---
+
+#### Function App
+
+Function Apps is a **serverless compute service** on Azure that allows you to run code without managing servers.  
+It's **event-driven**, meaning functions are triggered by specific events like HTTP requests, timer events, or messages in a queue.
+
+In this project, the Function App is used to:
+- Trigger an **HTTP request**
+- Fetch data from the **Snowflake Database**
+- Upload it to a **storage container**
+
+> _This is the final destination for the data, but there are intermediate steps covered below._
+
+**Function App Settings** (Consumption Plan):
+- **OS**: Windows  
+- **Runtime Stack**: PowerShell Core  
+- **Version**: 7.3 _(Use the latest version available)_  
+- **Storage**: Use the default suggested storage
+
+Keep other specifications as default and proceed to create the Function App.
+
+---
 
 #### Event Hub
-Event Hubs is a fully managed, real-time data ingestion service that allows you to stream millions of events per second from any source. It acts as a "front door" for an event pipeline, receiving data from producers and making it available for consumption by various analytics and storage services.
-We will use the Event Hub as the starting point in our Azure Data pipeline to fetch the data into an Azure Storage Container. 
-The Function App will connect the Snowflake Database and Event Hub, and migrate the data into the Event Hub when a HTTP Request is sent.
-Steps to create an Event Hub Namespace
-    Search Event Hub in the azure portal 
-    Click on create to create a new Event Hub Namespace- Use the default settings for all 
-    Once the resource is deployed, go into it and create a new eventhub within that 
-        Cleanup policy is delete
-        Partition count is 1
-Within the namespace, get the connection string
-    Head over to *Shared Access Policies*
-    Click on *RootManageSharedAccessKey*
-    Copy the *Connection String*
 
-#### Stream Analytics 
-Azure Stream Analytics is a fully managed, real-time analytics service that allows you to analyze and process high volumes of streaming data from various sources. It enables you to perform complex event processing, generate insights, and trigger actions based on real-time data streams.
-We will be using Stream Analytics to fetch the data from Event Hub and store it in Blob.
-We use this intermediate layer as blob cannot directly fetch data from Event Hubs, so stream analytics fetches it and stores in Blob.
-Use all default settings for the Stream Analytics job and make sure you connect it to the same Resource Group all your other services are hosted in.
+Event Hubs is a **fully managed, real-time data ingestion service** that allows you to stream millions of events per second.  
+It acts as a **front door** for the event pipeline — receiving data from producers and exposing it to downstream consumers.
 
-#### Azure Data Factory 
-Azure Data Factory is a service used for creating, maintaining and monitoring Data pipelines. It is a useful service that helps automate ETL process. It can be run at specific times or when a new file is being uploaded to a source directory (event based trigger).
-We will be using Data Factory to create a Data Flow and automate the process of transforming and cleaning the raw-data. 
-We will be using a Medallion architecture to store the data in (Bronze-Silver-Gold)
-Use all default settings for the Data Factory and make sure you connect it to the sam Resource Group all your other services are hosted in.
+In this setup:
+- Event Hub is the **starting point** in the Azure Data pipeline
+- The **Function App connects Snowflake → Event Hub**
+- Data is migrated into the Event Hub upon an HTTP trigger
+
+**Steps to create an Event Hub Namespace**:
+1. Search for **Event Hub** in the Azure Portal
+2. Click **Create** to set up a new Event Hub Namespace  
+   _Use default settings for all fields_
+3. Once deployed:
+    - Go into the resource
+    - Create a **new Event Hub**
+      - **Cleanup Policy**: Delete  
+      - **Partition Count**: 1
+
+**Get the Connection String**:
+- Go to **Shared Access Policies**
+- Click on **RootManageSharedAccessKey**
+- Copy the **Connection String** for later use
+
+---
+
+#### Stream Analytics
+
+Azure Stream Analytics is a **real-time analytics service** used to process and analyze large volumes of streaming data.
+
+In this project:
+- It pulls data **from Event Hub**
+- Writes processed data **into Blob Storage**
+
+> _This intermediate layer is necessary because Blob Storage cannot directly ingest data from Event Hubs._
+
+**Configuration**:
+- Use **default settings**
+- Ensure the **Stream Analytics job** is in the **same Resource Group** as the rest of your services
+
+---
+
+#### Azure Data Factory
+
+Azure Data Factory is a platform for building, managing, and monitoring **data pipelines**.  
+It helps automate **ETL (Extract, Transform, Load)** processes and supports event-based triggers or scheduled runs.
+
+In this project:
+- Data Factory is used to create a **Data Flow** to transform and clean the raw data
+- We follow a **Medallion Architecture**:  
+  - **Bronze**: Raw data  
+  - **Silver**: Cleaned data  
+  - **Gold**: Curated analytics-ready data
+
+**Configuration**:
+- Use **default settings**
+- Make sure it is linked to the **same Resource Group** as the other services
+
+---
 
 ### Migrating Data 
 
