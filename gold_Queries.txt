@@ -1,0 +1,13 @@
+ 1. Monthly Revenue by Product Category
+
+ 2. High Value Customer Summary
+
+ 3. Customer Demographics Heatmap
+ 
+ 4. Top N Products by Quantity Sold
+
+ 5. Gender Revenue Share %
+
+ 6. Inactive Customers (No Purchase in Last 60 Days)
+
+ All tables should be saved in Gold layer
