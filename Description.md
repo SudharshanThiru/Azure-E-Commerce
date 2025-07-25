@@ -175,6 +175,15 @@ In this project:
 
 ---
 
+#### Databricks
+
+Databricks is a cloud-based platform where you can build scale and govern data and AI. You can create clusters and run workflows where you can perform ETL tasks and build ML pipelines. In our project we will be using Databricks to perform the transformations and aggregations.
+Gold layer is where the data from Silver Layer (refined data) is aggregated for further analysis by the BI team.
+
+We will be using the managed service provided by Azure. Create a Databricks resource under the same resource group. Select **Premium workspace** when creating the resource. 
+
+---
+
 ### Migrating Data
 
 ---
@@ -290,3 +299,39 @@ This section handles **transforming raw data (Bronze) into cleaned data (Silver)
     - Create a new **Dataset** pointing to the **target location**
 
 ---
+
+#### 🧱 Databricks: Silver → Gold
+
+This section handles **transforming refined data (Silver) into aggregated data (Gold)** using Datbricks.
+
+1. Open **Databricks Resource**
+
+2. Go to the **Compute Tab**
+    - We will be creating a Cluster that will be the resource for running the notebook
+    - Cluster settings
+        - Single User
+        - Photon Acceleration OFF
+        - Latest version 
+        - You can use any language you want (Spark, Python, SQL)
+        - Standard F4 
+
+3. Import the **SilverToGold.ipynb** file (in case your json files don't work you can upload the CSV to the bronze data and continue with the CsV format)
+
+4. Run the entire file - This will perform the aggreagations mentioned in **gold_Queries.txt** and also write them to the gold layer.
+
+5. To confirm you can open the Gold layer in your storage and check for the folders. The files are stored in delta format so you will have Parquet files and delta logs.
+
+---
+
+### Visualizing Data 
+
+#### Power BI
+
+Once you have the data stored in the gold layer, we will be using Power BI to build visualizations based on them. You can build them according to your preferences, or you can follow a similar layout to how I have done it by refering to the screenshots. 
+
+To establish a connection with the data
+  - In Power BI, select **Get Data >> Azure >> Azure Data Lake Storage Gen2**
+  - Provide the URL of your ADLS storage
+  - Choose your authentication method and sign-in if required.
+
+Once you have established connection, you should be able to navigate through the contents of the ADLS. Select the data you want to import. 
